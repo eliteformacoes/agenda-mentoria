@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Agendamento, Status } from '../lib/types';
 import { listarAgendamentos, marcarStatus } from '../lib/agendamentos';
 import {
@@ -37,12 +37,18 @@ export function Painel() {
     setTimeout(() => setCopiadoProx(false), 1200);
   }
 
-  useEffect(() => {
+  const carregar = useCallback(() => {
+    setCarregando(true);
+    setErro(null);
     listarAgendamentos()
       .then(setItens)
       .catch((e) => setErro(String(e?.message ?? e)))
       .finally(() => setCarregando(false));
   }, []);
+
+  useEffect(() => {
+    carregar();
+  }, [carregar]);
 
   async function onMarcar(id: string, novo: Status) {
     setOcupadoId(id);
@@ -110,9 +116,18 @@ export function Painel() {
             Suas reuniões estratégicas da mentoria — organizadas por horário
           </p>
         </div>
-        <button className="signout" onClick={() => supabase.auth.signOut()}>
-          Sair
-        </button>
+        <div className="topbar-acts">
+          <button className="signout" onClick={carregar} disabled={carregando}>
+            <i
+              className="ti ti-refresh"
+              style={{ marginRight: 5, fontSize: 13 }}
+            ></i>
+            {carregando ? 'Atualizando…' : 'Recarregar'}
+          </button>
+          <button className="signout" onClick={() => supabase.auth.signOut()}>
+            Sair
+          </button>
+        </div>
       </div>
 
       {proxima && (

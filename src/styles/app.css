@@ -22,6 +22,11 @@
   justify-content: space-between;
   margin-bottom: 4px;
 }
+.topbar-acts {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 .signout {
   font-family: var(--fs);
   font-size: 12px;
@@ -31,6 +36,11 @@
   background: transparent;
   color: var(--tx-soft);
   cursor: pointer;
+  white-space: nowrap;
+}
+.signout:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 .signout:hover {
   border-color: var(--gold);
