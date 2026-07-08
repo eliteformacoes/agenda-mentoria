@@ -1,0 +1,31 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b0b0a;
+  --bg1: #131311;
+  --bg2: #1c1a16;
+  --line: #2a2823;
+  --line2: #201e1a;
+  --tx: #f0ebe1;
+  --tx-soft: #a29a8b;
+  --mut: #655f55;
+  --gold: #e4a93a;
+  --gold-l: #e6c88c;
+  --gold-12: rgba(228, 169, 58, 0.12);
+  --pos: #83b76a;
+  --blue: #7ba8d6;
+  --neg: #cc7059;
+  --fd: "Bricolage Grotesque", system-ui, sans-serif;
+  --fs: "Inter", system-ui, sans-serif;
+  --fm: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: var(--fs);
+  color: var(--tx);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}

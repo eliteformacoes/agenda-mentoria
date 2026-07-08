@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:/Users/elite/Documents/MentoriaCRM\" status)",
+      "mcp__386babbe-4aad-4706-a182-773cdbc90e31__list_projects",
+      "mcp__n8n-readonly__n8n_list_workflows",
+      "mcp__b8d0d266-75a9-424e-8a47-94d305e4cd8f__search_files",
+      "mcp__386babbe-4aad-4706-a182-773cdbc90e31__list_tables",
+      "mcp__b8d0d266-75a9-424e-8a47-94d305e4cd8f__read_file_content",
+      "mcp__b8d0d266-75a9-424e-8a47-94d305e4cd8f__download_file_content",
+      "mcp__386babbe-4aad-4706-a182-773cdbc90e31__apply_migration",
+      "mcp__visualize__show_widget",
+      "mcp__386babbe-4aad-4706-a182-773cdbc90e31__get_publishable_keys",
+      "mcp__386babbe-4aad-4706-a182-773cdbc90e31__get_project_url",
+      "Bash(npm install *)"
+    ]
+  }
+}
