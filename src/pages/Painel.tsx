@@ -29,6 +29,13 @@ export function Painel() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [ocupadoId, setOcupadoId] = useState<string | null>(null);
+  const [copiadoProx, setCopiadoProx] = useState(false);
+
+  function copiarProxima(link: string) {
+    navigator.clipboard?.writeText(link).catch(() => {});
+    setCopiadoProx(true);
+    setTimeout(() => setCopiadoProx(false), 1200);
+  }
 
   useEffect(() => {
     listarAgendamentos()
@@ -124,14 +131,23 @@ export function Painel() {
             </div>
           </div>
           {proxima.link_call && (
-            <a
-              className="btn-gold"
-              href={proxima.link_call}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <i className="ti ti-video"></i>Entrar na call
-            </a>
+            <div className="next-acts">
+              <a
+                className="btn-gold"
+                href={proxima.link_call}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <i className="ti ti-video"></i>Entrar na call
+              </a>
+              <button
+                className="iconbtn"
+                onClick={() => copiarProxima(proxima.link_call!)}
+                aria-label="Copiar link da call"
+              >
+                <i className={copiadoProx ? 'ti ti-check' : 'ti ti-copy'}></i>
+              </button>
+            </div>
           )}
         </div>
       )}

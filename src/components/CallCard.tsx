@@ -78,6 +78,19 @@ export function CallCard({
           ) : (
             <span className="nolink">sem link</span>
           )}
+          <select
+            className="marksel-row"
+            value={a.status === 'nao_agendada' ? 'agendado' : a.status}
+            disabled={ocupado}
+            onChange={(e) => onMarcar(a.id, e.target.value as Status)}
+            aria-label="Marcar status"
+          >
+            {STATUS_MARCAVEIS.map((s) => (
+              <option key={s} value={s}>
+                {STATUS_LABEL[s]}
+              </option>
+            ))}
+          </select>
           <button
             className="iconbtn"
             onClick={() => setAberto((v) => !v)}
@@ -133,21 +146,6 @@ export function CallCard({
                 )}
               </div>
             </div>
-          </div>
-          <div className="markrow">
-            <label>Marcar status</label>
-            <select
-              className="marksel"
-              value={a.status === 'nao_agendada' ? 'agendado' : a.status}
-              disabled={ocupado}
-              onChange={(e) => onMarcar(a.id, e.target.value as Status)}
-            >
-              {STATUS_MARCAVEIS.map((s) => (
-                <option key={s} value={s}>
-                  {STATUS_LABEL[s]}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
       )}

@@ -79,7 +79,6 @@
   margin-top: 1px;
 }
 .btn-gold {
-  margin-left: auto;
   font-family: var(--fs);
   font-size: 12px;
   font-weight: 500;
@@ -93,6 +92,23 @@
   align-items: center;
   gap: 6px;
   text-decoration: none;
+}
+.next-acts {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.marksel-row {
+  font-family: var(--fs);
+  font-size: 12px;
+  background: var(--bg2);
+  color: var(--tx);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  max-width: 130px;
 }
 
 .navrow {
