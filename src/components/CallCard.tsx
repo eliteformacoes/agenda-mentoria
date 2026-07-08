@@ -146,6 +146,17 @@ export function CallCard({
               </div>
             </div>
           </div>
+          {a.respostas && Object.keys(a.respostas).length > 0 && (
+            <div className="respostas">
+              <div className="dl">Respostas do formulário</div>
+              {Object.entries(a.respostas).map(([q, v]) => (
+                <div className="resp-item" key={q}>
+                  <span className="resp-q">{q}</span>
+                  <span className="resp-a">{String(v)}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

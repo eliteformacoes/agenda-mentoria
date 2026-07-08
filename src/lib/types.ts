@@ -32,6 +32,7 @@ export interface Agendamento {
   confirmacao_enviada: boolean;
   lembrete_enviado: boolean;
   lembrete_agendar_enviado: boolean;
+  respostas: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
