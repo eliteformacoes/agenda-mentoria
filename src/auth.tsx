@@ -47,10 +47,16 @@ export function Login() {
     setEnviando(true);
     setErro(null);
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password: senha,
     });
-    if (error) setErro('E-mail ou senha inválidos.');
+    if (error) {
+      setErro(
+        error.message === 'Invalid login credentials'
+          ? 'E-mail ou senha inválidos.'
+          : `Erro de conexão: ${error.message}`,
+      );
+    }
     setEnviando(false);
   }
 
