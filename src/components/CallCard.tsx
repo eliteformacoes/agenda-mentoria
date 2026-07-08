@@ -52,8 +52,7 @@ export function CallCard({
           </div>
           <div className="bot">
             <span>{PRODUTO_PADRAO}</span>·<span>{a.qualificacao ?? 'sem qualificação'}</span>·
-            <span>{a.closer ?? 'sem closer'}</span>·
-            <span>{a.confirmacao_enviada ? 'confirmado' : 'não confirmado'}</span>
+            <span>{a.closer ?? 'sem closer'}</span>
           </div>
         </div>
         <div className="right">
