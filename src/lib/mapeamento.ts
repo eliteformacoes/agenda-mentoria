@@ -47,17 +47,40 @@ export function faixaScore(score: number | null): Faixa {
 
 export type Grupo = 'hoje' | 'amanha' | 'proximos' | 'passado';
 
-function ymd(d: Date): string {
-  return d.toLocaleDateString('en-CA', { timeZone: TZ }); // yyyy-mm-dd
+/**
+ * As colunas de data (`data_agendada`, `data_reativacao`) são
+ * `timestamp without time zone`: guardam o relógio de Brasília cru, sem fuso.
+ * Interpretamos esse relógio como se fosse UTC (via `Date.UTC`) e formatamos
+ * com `timeZone: 'UTC'` — assim o valor exibido é sempre igual ao armazenado,
+ * independente do fuso do navegador. Nunca use `new Date(iso)` direto nestes
+ * campos: sem fuso, o parsing vira horário local do navegador (não confiável).
+ */
+export function parseNaive(iso: string | null): Date | null {
+  if (!iso) return null;
+  const m = String(iso).match(
+    /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/,
+  );
+  if (!m) return null;
+  const [, y, mo, d, h, mi, s] = m;
+  return new Date(Date.UTC(+y, +mo - 1, +d, +h, +mi, s ? +s : 0));
 }
 
-/** Classifica um agendamento em hoje / amanhã / próximos / passado (fuso BR). */
-export function grupoData(iso: string | null, agora: Date = new Date()): Grupo {
-  if (!iso) return 'passado';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return 'passado';
-  const hoje = new Date(ymd(agora) + 'T00:00:00');
-  const dia = new Date(ymd(d) + 'T00:00:00');
+/** "Agora" no relógio de Brasília, no mesmo frame naive-UTC (para comparações). */
+export function agoraNaive(): Date {
+  // sv-SE => "YYYY-MM-DD HH:mm:ss"
+  return parseNaive(new Date().toLocaleString('sv-SE', { timeZone: TZ }))!;
+}
+
+function ymd(d: Date): string {
+  return d.toLocaleDateString('en-CA', { timeZone: 'UTC' }); // yyyy-mm-dd
+}
+
+/** Classifica um agendamento em hoje / amanhã / próximos / passado (relógio BR). */
+export function grupoData(iso: string | null, agora: Date = agoraNaive()): Grupo {
+  const d = parseNaive(iso);
+  if (!d) return 'passado';
+  const hoje = new Date(ymd(agora) + 'T00:00:00Z');
+  const dia = new Date(ymd(d) + 'T00:00:00Z');
   const diff = Math.round((dia.getTime() - hoje.getTime()) / 86400000);
   if (diff < 0) return 'passado';
   if (diff === 0) return 'hoje';
@@ -65,35 +88,32 @@ export function grupoData(iso: string | null, agora: Date = new Date()): Grupo {
   return 'proximos';
 }
 
-/** Horário curto: "14:00" (fuso BR). */
+/** Horário curto: "14:00" (relógio BR). */
 export function formatHora(iso: string | null): string {
-  if (!iso) return '--:--';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '--:--';
+  const d = parseNaive(iso);
+  if (!d) return '--:--';
   return d.toLocaleTimeString('pt-BR', {
-    timeZone: TZ,
+    timeZone: 'UTC',
     hour: '2-digit',
     minute: '2-digit',
   });
 }
 
-/** Abreviação do dia da semana no fuso BR: "Ter". */
+/** Abreviação do dia da semana (relógio BR): "Ter". */
 export function abrevDia(iso: string | null): string {
-  if (!iso) return '';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
-  const wd = d.toLocaleDateString('pt-BR', { timeZone: TZ, weekday: 'short' });
+  const d = parseNaive(iso);
+  if (!d) return '';
+  const wd = d.toLocaleDateString('pt-BR', { timeZone: 'UTC', weekday: 'short' });
   const limpo = wd.replace('.', '').trim();
   return limpo.charAt(0).toUpperCase() + limpo.slice(1);
 }
 
 /** Rótulo do cabeçalho de dia: "Ter 07/07" (com prefixo Hoje/Amanhã). */
-export function formatDiaHeader(iso: string | null, agora: Date = new Date()): string {
-  if (!iso) return 'Sem data';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return 'Sem data';
+export function formatDiaHeader(iso: string | null, agora: Date = agoraNaive()): string {
+  const d = parseNaive(iso);
+  if (!d) return 'Sem data';
   const dm = d.toLocaleDateString('pt-BR', {
-    timeZone: TZ,
+    timeZone: 'UTC',
     day: '2-digit',
     month: '2-digit',
   });

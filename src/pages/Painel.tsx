@@ -6,6 +6,8 @@ import {
   grupoData,
   formatHora,
   formatDiaHeader,
+  parseNaive,
+  agoraNaive,
   type Grupo,
 } from '../lib/mapeamento';
 import { CallCard } from '../components/CallCard';
@@ -82,18 +84,18 @@ export function Painel() {
   );
 
   const proxima = useMemo(() => {
-    const agora = Date.now();
+    const agora = agoraNaive().getTime();
     return itens
       .filter(
         (x) =>
           x.status === 'agendado' &&
           x.data_agendada &&
-          new Date(x.data_agendada).getTime() >= agora,
+          (parseNaive(x.data_agendada)?.getTime() ?? -Infinity) >= agora,
       )
       .sort(
         (a, b) =>
-          new Date(a.data_agendada!).getTime() -
-          new Date(b.data_agendada!).getTime(),
+          (parseNaive(a.data_agendada)?.getTime() ?? 0) -
+          (parseNaive(b.data_agendada)?.getTime() ?? 0),
       )[0];
   }, [itens]);
 
