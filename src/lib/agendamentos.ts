@@ -1,5 +1,16 @@
 import { supabase } from './supabase';
-import type { Agendamento, Status } from './types';
+import type { Agendamento, MensagemConversa, Status } from './types';
+
+/** Conversa mais recente do lead (já filtrada no banco), carregada sob demanda. */
+export async function buscarConversa(
+  agendamentoId: string,
+): Promise<MensagemConversa[]> {
+  const { data, error } = await supabase.rpc('conversa_do_agendamento', {
+    p_agendamento_id: agendamentoId,
+  });
+  if (error) throw error;
+  return (data ?? []) as MensagemConversa[];
+}
 
 /** Painel: só quem tem reunião marcada (data_agendada preenchida), mais próximas primeiro. */
 export async function listarAgendamentos(): Promise<Agendamento[]> {

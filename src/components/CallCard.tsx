@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import type { Agendamento, Status } from '../lib/types';
+import { useEffect, useRef, useState } from 'react';
+import type { Agendamento, MensagemConversa, Status } from '../lib/types';
+import { buscarConversa } from '../lib/agendamentos';
 import {
   PRODUTO_PADRAO,
   STATUS_LABEL,
@@ -26,7 +27,28 @@ export function CallCard({
 }) {
   const [aberto, setAberto] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  const [conversa, setConversa] = useState<MensagemConversa[] | null>(null);
+  const [carregandoConv, setCarregandoConv] = useState(false);
+  const [erroConv, setErroConv] = useState(false);
+  const chatRef = useRef<HTMLDivElement>(null);
   const sc = COR_SCORE[faixaScore(a.lead_score)];
+
+  // Busca a conversa só quando expande, e uma vez só (fica em cache no card).
+  useEffect(() => {
+    if (!aberto || conversa !== null || carregandoConv || erroConv) return;
+    setCarregandoConv(true);
+    buscarConversa(a.id)
+      .then(setConversa)
+      .catch(() => setErroConv(true))
+      .finally(() => setCarregandoConv(false));
+  }, [aberto, a.id, conversa, carregandoConv, erroConv]);
+
+  // Abre já na mensagem mais recente.
+  useEffect(() => {
+    if (conversa && chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [conversa]);
 
   function copiar() {
     if (!a.link_call) return;
@@ -34,6 +56,8 @@ export function CallCard({
     setCopiado(true);
     setTimeout(() => setCopiado(false), 1200);
   }
+
+  const agente = conversa?.find((m) => m.agente)?.agente ?? null;
 
   return (
     <div className="call">
@@ -51,7 +75,8 @@ export function CallCard({
             <span className={`st ${a.status}`}>{STATUS_LABEL[a.status]}</span>
           </div>
           <div className="bot">
-            <span>{PRODUTO_PADRAO}</span>·<span>{a.qualificacao ?? 'sem qualificação'}</span>·
+            <span>{PRODUTO_PADRAO}</span>·
+            <span>{a.qualificacao ?? 'sem qualificação'}</span>·
             <span>{a.closer ?? 'sem closer'}</span>
           </div>
         </div>
@@ -104,40 +129,62 @@ export function CallCard({
       </div>
 
       {aberto && (
-        <div className="detail">
-          <div className="grid">
-            <div>
+        <div className="detalhe">
+          <div className="col-conversa">
+            <div className="secttl">
+              <i className="ti ti-message-circle"></i>
+              Conversa{agente ? ` · ${agente}` : ''}
+              {conversa && conversa.length > 0 && (
+                <span className="qtd">{conversa.length} msgs</span>
+              )}
+            </div>
+            <div className="chat" ref={chatRef}>
+              {carregandoConv ? (
+                <div className="chat-vazio">Carregando conversa…</div>
+              ) : erroConv ? (
+                <div className="chat-vazio">Não consegui carregar a conversa.</div>
+              ) : !conversa || conversa.length === 0 ? (
+                <div className="chat-vazio">Sem conversa registrada.</div>
+              ) : (
+                conversa.map((m, i) => (
+                  <div
+                    key={i}
+                    className={`m ${m.autor === 'human' ? 'lead' : 'ag'}`}
+                  >
+                    {m.conteudo}
+                    <div className="hr">{formatHora(m.em)}</div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="col-dados">
+            <div className="secttl">
+              <i className="ti ti-user"></i>Dados do lead
+            </div>
+            <div className="bloco">
               <div className="dl">Telefone</div>
               <div className="dv">{a.telefone ?? '—'}</div>
-            </div>
-            <div>
               <div className="dl">Email</div>
               <div className="dv">{a.email ?? '—'}</div>
-            </div>
-            <div>
               <div className="dl">Instagram</div>
               <div className="dv">{a.instagram ?? '—'}</div>
-            </div>
-            <div>
               <div className="dl">Tipo de call</div>
               <div className="dv">{a.tipo_call ?? '—'}</div>
-            </div>
-            <div>
               <div className="dl">Qualificação</div>
               <div className="dv">
                 {a.qualificacao ?? '—'}
                 {a.lead_score != null ? ` · score ${a.lead_score}` : ''}
               </div>
-            </div>
-            <div>
               <div className="dl">Formulário</div>
-              <div className="dv">
+              <div className="dv ultimo">
                 {a.form_url ? (
                   <a href={a.form_url} target="_blank" rel="noreferrer">
                     ver respostas{' '}
                     <i
                       className="ti ti-external-link"
-                      style={{ fontSize: 12 }}
+                      style={{ fontSize: 11 }}
                     ></i>
                   </a>
                 ) : (
@@ -145,18 +192,23 @@ export function CallCard({
                 )}
               </div>
             </div>
-          </div>
-          {a.respostas && Object.keys(a.respostas).length > 0 && (
-            <div className="respostas">
-              <div className="dl">Respostas do formulário</div>
-              {Object.entries(a.respostas).map(([q, v]) => (
-                <div className="resp-item" key={q}>
-                  <span className="resp-q">{q}</span>
-                  <span className="resp-a">{String(v)}</span>
+
+            {a.respostas && Object.keys(a.respostas).length > 0 && (
+              <>
+                <div className="secttl espaco">
+                  <i className="ti ti-list-check"></i>Respostas do formulário
                 </div>
-              ))}
-            </div>
-          )}
+                <div className="bloco">
+                  {Object.entries(a.respostas).map(([q, v]) => (
+                    <div key={q}>
+                      <div className="rq">{q}</div>
+                      <div className="ra">{String(v)}</div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>

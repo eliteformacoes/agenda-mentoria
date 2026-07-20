@@ -6,6 +6,13 @@ export type Status =
   | 'cancelado'
   | 'nao_agendada';
 
+export interface MensagemConversa {
+  autor: 'human' | 'ai';
+  conteudo: string;
+  em: string;
+  agente: string | null;
+}
+
 export interface Agendamento {
   id: string;
   id_contato: string;
